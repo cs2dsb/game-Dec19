@@ -1,0 +1,11 @@
+(
+  title: "BunnyMark",
+  dimensions: Some((1024, 1024)),
+  max_dimensions: None,
+  min_dimensions: None,
+  multisampling: 0,
+  visibility: true,
+  vsync: true,
+  //fullscreen: Some((0, "")),
+  fullscreen: None,
+)

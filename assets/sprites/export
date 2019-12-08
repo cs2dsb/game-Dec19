@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+rm -f *.png
+krita character_01_walk_up.kra --export-sequence --export-filename character_01_walk_up_.png
+krita character_01_walk_down.kra --export-sequence --export-filename character_01_walk_down_.png
+krita character_01_walk_left.kra --export-sequence --export-filename character_01_walk_left_.png
+krita character_01_walk_right.kra --export-sequence --export-filename character_01_walk_right_.png
+
+rm -rf ../sprite_sheets/*.png ../sprite_sheets/*.ron
+sheep pack character_0*.png \
+--out ../sprite_sheets/character_0 \
+--options max_height=256 \
+--packer maxrects \
+--pretty \
+--format amethyst_named

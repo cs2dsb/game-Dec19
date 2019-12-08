@@ -1,0 +1,372 @@
+#![enable(implicit_some)]
+/*!
+    @import /amethyst_assets/src/prefab/mod.rs#Prefab
+    @import ../../sprite_animation/main.rs#MyPrefabData
+    Prefab<MyPrefabData>
+*/
+
+Prefab(
+    entities: [
+        // Grey bat
+        PrefabEntity(
+            data: MyPrefabData(
+                // SpriteScenePrefab
+                sprite_scene: (
+                    // SpriteSheetPrefab with index 0
+                    sheet: Sheet(
+                        // TexturePrefab
+                        texture: File("sprite_sheets/character_01.png", (
+                            "IMAGE", (
+                                sampler_info: (
+                                    min_filter: Nearest,
+                                    mag_filter: Nearest,
+                                    mip_filter: Nearest,
+                                    wrap_mode: (Tile, Tile, Tile),
+                                    lod_bias: (0),
+                                    lod_range: (
+                                        start: ( 0 ),
+                                        end: ( 8000 ),
+                                    ),
+                                    comparison: None,
+                                    border: (0),
+                                    normalized: true,
+                                    anisotropic: Off,
+                                ),
+                            ),
+                        )),
+                        sprites: [
+                            List((
+    texture_width: 64,
+    texture_height: 128,
+    sprites: [
+        (
+            name: "character_01_walk_down_0000",
+            x: 0,
+            y: 0,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0001",
+            x: 0,
+            y: 16,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0002",
+            x: 0,
+            y: 32,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0003",
+            x: 0,
+            y: 48,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0005",
+            x: 0,
+            y: 64,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0006",
+            x: 0,
+            y: 80,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0007",
+            x: 0,
+            y: 96,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0000",
+            x: 0,
+            y: 112,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0001",
+            x: 16,
+            y: 0,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0002",
+            x: 16,
+            y: 16,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0003",
+            x: 16,
+            y: 32,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0004",
+            x: 16,
+            y: 48,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0005",
+            x: 16,
+            y: 64,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0006",
+            x: 16,
+            y: 80,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_left_0007",
+            x: 16,
+            y: 96,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0000",
+            x: 16,
+            y: 112,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0001",
+            x: 32,
+            y: 0,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0002",
+            x: 32,
+            y: 16,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0003",
+            x: 32,
+            y: 32,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0004",
+            x: 32,
+            y: 48,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0005",
+            x: 32,
+            y: 64,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0006",
+            x: 32,
+            y: 80,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_right_0007",
+            x: 32,
+            y: 96,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0000",
+            x: 32,
+            y: 112,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0001",
+            x: 48,
+            y: 0,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0002",
+            x: 48,
+            y: 16,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0003",
+            x: 48,
+            y: 32,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0005",
+            x: 48,
+            y: 48,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0006",
+            x: 48,
+            y: 64,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0007",
+            x: 48,
+            y: 80,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_down_0004",
+            x: 0,
+            y: 0,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+        (
+            name: "character_01_walk_up_0004",
+            x: 32,
+            y: 112,
+            width: 16,
+            height: 16,
+            offsets: None,
+        ),
+    ],
+)),
+                        ],
+                        name: "walker",
+                    ),
+                    // SpriteRenderPrefab
+                    render: (
+                        sheet: "walker",
+                        sprite_number: 1,
+                    ),
+                    // Transform
+                    transform: (
+                        translation: (500.0, 500.0, 0.1),
+                        scale: (2., 2., 2.),
+                    ),
+                ),
+                // AnimationSetPrefab
+                animation_set: (
+                    animations: [
+                        (WalkUp, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [248, 249, 250, 251, 252, 253, 254, 255],
+                            function: Step,
+                        ))])),
+                        (WalkRight, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [496, 497, 498, 499, 500, 501, 502, 503],
+                            function: Step,
+                        ))])),
+                        (WalkDown, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [744, 745, 746, 747, 748, 749, 780, 781],
+                            function: Step,
+                        ))])),
+                        (WalkLeft, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [992, 993, 994, 995, 996, 997, 998, 999],
+                            function: Step,
+                        ))])),
+                        (DeathUp, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [2232, 2233, 2234, 2235, 2236, 2237, 2238, 2239],
+                            function: Step,
+                        ))])),
+                        (DeathRight, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [2480, 2481, 2482, 2483, 2484, 2485, 2486, 2487],
+                            function: Step,
+                        ))])),
+                        (DeathDown, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [2728, 2729, 2730, 2731, 2732, 2733, 2734, 2735],
+                            function: Step,
+                        ))])),
+                        (DeathLeft, (samplers: [(0, SpriteIndex, (
+                            input: [.00, .05, .1, .15, .2, .25, .3, .35, .4],
+                            output: [2976, 2977, 2978, 2979, 2980, 2981, 2982, 2983],
+                            function: Step,
+                        ))])),
+                        (RotLeft, (samplers: [(0, SpriteIndex, (
+                            input: [5.5, 6., 6.5, 7., 7.5, 8., 8.5, 9., 20.],
+                            output: [3224, 3225, 3226, 3227, 3228, 3229, 3230, 3231],
+                            function: Step,
+                        ))])),
+                        (RotRight, (samplers: [(0, SpriteIndex, (
+                            input: [5.5, 6., 6.5, 7., 7.5, 8., 8.5, 9., 20.],
+                            output: [3472, 3473, 3474, 3475, 3476, 3477, 3478, 3479],
+                            function: Step,
+                        ))])),
+                    ],
+                ),
+            ),
+        ),
+    ],
+)
