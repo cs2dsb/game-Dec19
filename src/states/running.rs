@@ -4,46 +4,16 @@ use amethyst::{
     prelude::*,
     renderer::Camera,
     window::ScreenDimensions,
-        
 };
 use log::info;
-use crate::resources::{
-    Sprites,
-    AnimationId,
-};
 
 #[derive(Default)]
 pub struct Running;
 
-fn add_sprite(world: &mut World, animation: AnimationId, x: f32, y: f32) {
-    let mut sprite_components = world.read_resource::<Sprites>().get_character_1_components();
-    sprite_components.default_animation = Some(animation);
-    
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(x, y, 1.);
-    {
-        let scale = transform.scale_mut();
-        scale.x = 1.;
-        scale.y = 1.;
-    }
-
-    let mut builder = world.create_entity();
-    builder = builder
-        .with(transform);
-    builder = sprite_components
-        .apply(builder);
-    builder.build();
-}
-
 impl SimpleState for Running {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
-        init_camera(world);
-        
-        add_sprite(world, AnimationId::WalkRight, 150., 150.);       
-        add_sprite(world, AnimationId::WalkLeft, 300., 150.);       
-        add_sprite(world, AnimationId::WalkUp, 150., 300.);       
-        add_sprite(world, AnimationId::WalkDown, 300., 300.);       
+        init_camera(world);  
 
         log::info!("Running");
     }

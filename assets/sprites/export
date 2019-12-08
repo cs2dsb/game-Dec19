@@ -5,6 +5,10 @@ krita character_01_walk_up.kra --export-sequence --export-filename character_01_
 krita character_01_walk_down.kra --export-sequence --export-filename character_01_walk_down_.png
 krita character_01_walk_left.kra --export-sequence --export-filename character_01_walk_left_.png
 krita character_01_walk_right.kra --export-sequence --export-filename character_01_walk_right_.png
+krita character_01_walk_upleft.kra --export-sequence --export-filename character_01_walk_upleft_.png
+krita character_01_walk_downleft.kra --export-sequence --export-filename character_01_walk_downleft_.png
+krita character_01_walk_upright.kra --export-sequence --export-filename character_01_walk_upright_.png
+krita character_01_walk_downright.kra --export-sequence --export-filename character_01_walk_downright_.png
 
 rm -rf ../sprite_sheets/*.png ../sprite_sheets/*.ron
 sheep pack character_0*.png \

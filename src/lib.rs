@@ -1,3 +1,5 @@
+#![feature(const_fn)]
+
 use amethyst::{
     core::transform::TransformBundle,
     prelude::*,
@@ -96,9 +98,7 @@ pub fn run() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderDebugLines::default()),
         )?
-        /*
-        .with_bundle(systems::Bundle)?
-        */;
+        .with_bundle(systems::Bundle)?;
 
     let builder = Application::build(
         assets_path, 
