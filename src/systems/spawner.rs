@@ -11,7 +11,7 @@ use amethyst::{
     utils::fps_counter::FpsCounter,
     window::ScreenDimensions,
     renderer::{
-        debug_drawing::DebugLinesComponent,
+        //debug_drawing::DebugLinesComponent,
         Transparent,
     },
 };
@@ -20,6 +20,7 @@ use crate::{
     components::{
         Velocity,
         Animation,
+        Age,
     },
     resources::Sprites,
 };
@@ -50,17 +51,15 @@ impl Spawner {
             transform
         };
 
-        let velocity = Velocity::rand(10., 100.);
-        let animation = Animation::default();
-
         let sprite_components = sprites_resource.get_character_1_components();
         
         let mut builder = lazy_update
             .create_entity(entities)
-            .with(animation)
+            .with(Animation::default())
             .with(Transparent)
             .with(transform)
-            .with(velocity)
+            .with(Velocity::rand(10., 100.))
+            .with(Age::default())
             //.with(DebugLinesComponent::new())
             ;
 
@@ -98,8 +97,8 @@ impl<'s> System<'s> for Spawner {
         let delta_seconds = time.delta_seconds();
         self.elapsed += delta_seconds;
 
-        if self.elapsed >= 0.02 {
-            self.elapsed -= 0.02;
+        if self.elapsed >= 1. {
+            self.elapsed -= 1.;
             let fps = fps.sampled_fps();
             if fps > 59.5  && self.count < 10000 {
                 self.spawn_boid(

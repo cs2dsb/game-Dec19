@@ -24,3 +24,9 @@ pub use spawner::*;
 
 mod fps_log;
 pub use fps_log::*;
+
+mod age;
+pub use age::*;
+
+mod murder;
+pub use murder::*;

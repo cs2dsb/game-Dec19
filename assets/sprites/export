@@ -9,11 +9,18 @@ krita character_01_walk_upleft.kra --export-sequence --export-filename character
 krita character_01_walk_downleft.kra --export-sequence --export-filename character_01_walk_downleft_.png
 krita character_01_walk_upright.kra --export-sequence --export-filename character_01_walk_upright_.png
 krita character_01_walk_downright.kra --export-sequence --export-filename character_01_walk_downright_.png
+krita character_01_die_up.kra --export-sequence --export-filename character_01_die_up_.png
+krita character_01_die_down.kra --export-sequence --export-filename character_01_die_down_.png
+krita character_01_die_left.kra --export-sequence --export-filename character_01_die_left_.png
+krita character_01_die_right.kra --export-sequence --export-filename character_01_die_right_.png
+krita character_01_die_upleft.kra --export-sequence --export-filename character_01_die_upleft_.png
+krita character_01_die_downleft.kra --export-sequence --export-filename character_01_die_downleft_.png
+krita character_01_die_upright.kra --export-sequence --export-filename character_01_die_upright_.png
+krita character_01_die_downright.kra --export-sequence --export-filename character_01_die_downright_.png
 
 rm -rf ../sprite_sheets/*.png ../sprite_sheets/*.ron
 sheep pack character_0*.png \
 --out ../sprite_sheets/character_0 \
---options max_height=256 \
 --packer maxrects \
 --pretty \
 --format amethyst_named

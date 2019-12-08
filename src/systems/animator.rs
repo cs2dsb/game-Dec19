@@ -45,7 +45,6 @@ impl<'s> System<'s> for Animator {
                     let is_terminal = next.is_terminal();
                     if is_terminal {
                         died.push(e);
-                        //log::info!("{:?}. Setting to: {:?}", e, next);
                     }
                     control_set.add_animation(
                         next,
@@ -65,7 +64,6 @@ impl<'s> System<'s> for Animator {
             }
         }
         for e in died {
-            //log::info!("Removing animation for: {:?}", e);
             animation.remove(e);
         }
     }    

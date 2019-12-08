@@ -11,3 +11,4 @@ Cargo.lock
 
 # Krita backup files
 **/*.kra~
+**/*.kra-autosave.kra
