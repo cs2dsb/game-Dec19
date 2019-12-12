@@ -19,6 +19,7 @@ use amethyst::{
         //PrefabLoaderSystemDesc,
         Processor,
     },
+    input::{InputBundle, StringBindings},
 };
 use log::LevelFilter;
 
@@ -66,9 +67,10 @@ pub fn run() -> amethyst::Result<()> {
     let assets_path = app_root_path.join("assets");
     let config_path = app_root_path.join("config");
     let display_config_path = config_path.join("display_config.ron");
-    //let game_config_path = resources_path.join("config.ron");
+    let binding_config_path = config_path.join("binding_config.ron");
+    let game_config_path = config_path.join("game_config.ron");
 
-    //let game_config = config::Game::load(&game_config_path);
+    let game_config = config::Game::load(&game_config_path);
 
     let game_data = GameDataBuilder::default()
         .with(Processor::<resources::NamedSpriteSheet>::new(), "", &[])
@@ -80,6 +82,10 @@ pub fn run() -> amethyst::Result<()> {
             &[],
         )
         */
+        .with_bundle(            
+            InputBundle::<StringBindings>::new()
+                .with_bindings_from_file(binding_config_path)?,
+        )?
         .with_bundle(AnimationBundle::<resources::AnimationId, SpriteRender>::new(
             "sprite_animation_control",
             "sprite_sampler_interpolation",
@@ -100,11 +106,11 @@ pub fn run() -> amethyst::Result<()> {
         )?
         .with_bundle(systems::Bundle)?;
 
-    let builder = Application::build(
+    let mut builder = Application::build(
         assets_path, 
         states::Loading::default(),
     )?;
-    //builder = game_config.register(builder);
+    builder = game_config.register(builder);
     //builder = components::register_components(builder);
     
     let mut game = builder

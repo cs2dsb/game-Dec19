@@ -27,6 +27,11 @@ use amethyst::{
         AnimationSet,
     },
 };
+use regex::Regex;
+use rand::{
+    thread_rng,
+    seq::SliceRandom,
+};
 use crate::resources::{
     AnimationId,
     NamedSpriteSheet,
@@ -35,9 +40,12 @@ use crate::resources::{
     NamedAnimationSetHandle,
 };
 
-const SPRITE_SHEET_RON: &str = "sprite_sheets/character_0.ron";
-const ANIMATION_SET_RON: &str = "animations/character_0.ron";
-const SPRITE_SHEET_PNG: &str = "sprite_sheets/character_0.png";
+const CHARACTER_SPRITE_SHEET_RON: &str = "sprite_sheets/character_0.ron";
+const CHARACTER_SPRITE_SHEET_PNG: &str = "sprite_sheets/character_0.png";
+const CHARACTER_ANIMATION_SET_RON: &str = "animations/character_0.ron";
+const TILESET_SPRITE_SHEET_RON: &str = "sprite_sheets/tiles.ron";
+const TILESET_SPRITE_SHEET_PNG: &str = "sprite_sheets/tiles.png";
+
 
 #[derive(Debug)]
 pub enum Error {
@@ -46,29 +54,31 @@ pub enum Error {
 
 /// Holds handles to required assets
 pub struct SpritesLoader {
-    named_sprites_handle: NamedSpriteSheetHandle,
-    named_animation_handle: NamedAnimationSetHandle,
-    character_1_sheet_handle: Handle<SpriteSheet>,
+    character_named_sprites_handle: NamedSpriteSheetHandle,
+    character_named_animation_handle: NamedAnimationSetHandle,
+    character_sheet_handle: Handle<SpriteSheet>,
+    tiles_named_sprites_handle: NamedSpriteSheetHandle,
+    tiles_sheet_handle: Handle<SpriteSheet>,
     progress_counter: ProgressCounter,
 }
 
 impl SpritesLoader {
     /// Creates a new SpritesLoader which kicks off loading of the assets required by Sprites
     pub fn new(world: &mut World, mut progress_counter: ProgressCounter) -> Self {  
-        let named_sprites_handle = {
+        let character_named_sprites_handle = {
             let loader = world.read_resource::<Loader>();
             loader.load(
-                SPRITE_SHEET_RON,
+                CHARACTER_SPRITE_SHEET_RON,
                 RonFormat,
                 &mut progress_counter,
                 &world.read_resource::<AssetStorage<NamedSpriteSheet>>(),
             )
         };  
 
-        let named_animation_handle = {
+        let character_named_animation_handle = {
             let loader = world.read_resource::<Loader>();
             loader.load(
-                ANIMATION_SET_RON,
+                CHARACTER_ANIMATION_SET_RON,
                 RonFormat,
                 &mut progress_counter,
                 &world.read_resource::<AssetStorage<NamedAnimationSet>>(),
@@ -79,28 +89,62 @@ impl SpritesLoader {
             let loader = world.read_resource::<Loader>();
             let texture_storage = world.read_resource::<AssetStorage<Texture>>();
             loader.load(
-                SPRITE_SHEET_PNG,
+                CHARACTER_SPRITE_SHEET_PNG,
                 ImageFormat::default(),
                 &mut progress_counter,
                 &texture_storage,
             )
         };
 
-        let character_1_sheet_handle = {
+        let character_sheet_handle = {
             let loader = world.read_resource::<Loader>();
             let sheet_storage = world.read_resource::<AssetStorage<SpriteSheet>>();
             loader.load(
-                SPRITE_SHEET_RON,
+                CHARACTER_SPRITE_SHEET_RON,
                 SpriteSheetFormat(texture_handle),
                 &mut progress_counter,
                 &sheet_storage,
             )
         };
 
+        let texture_handle = {
+            let loader = world.read_resource::<Loader>();
+            let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+            loader.load(
+                TILESET_SPRITE_SHEET_PNG,
+                ImageFormat::default(),
+                &mut progress_counter,
+                &texture_storage,
+            )
+        };
+
+        let tiles_sheet_handle = {
+            let loader = world.read_resource::<Loader>();
+            let sheet_storage = world.read_resource::<AssetStorage<SpriteSheet>>();
+            loader.load(
+                TILESET_SPRITE_SHEET_RON,
+                SpriteSheetFormat(texture_handle),
+                &mut progress_counter,
+                &sheet_storage,
+            )
+        };  
+
+        let tiles_named_sprites_handle = {
+            let loader = world.read_resource::<Loader>();
+            loader.load(
+                TILESET_SPRITE_SHEET_RON,
+                RonFormat,
+                &mut progress_counter,
+                &world.read_resource::<AssetStorage<NamedSpriteSheet>>(),
+            )
+        };  
+
         Self {
-            named_sprites_handle,
-            named_animation_handle,
-            character_1_sheet_handle,
+            character_named_sprites_handle,
+            character_named_animation_handle,
+            character_sheet_handle,
+            tiles_sheet_handle,
+            tiles_named_sprites_handle,
             progress_counter,
         }
     }
@@ -114,10 +158,54 @@ impl SpritesLoader {
     }
 }
 
+pub enum TileDirection {
+    Up,
+    Down,
+    Left,
+    Right,
+    UpLeftCorner,
+    UpLeftPoint,
+    UpRightCorner,
+    UpRightPoint,
+    DownLeftCorner,
+    DownLeftPoint,
+    DownRightCorner,
+    DownRightPoint,
+}
+
+#[derive(Debug)]
+pub struct Tiles {
+    up: Vec<SpriteRender>,
+    down: Vec<SpriteRender>,
+    left: Vec<SpriteRender>,
+    right: Vec<SpriteRender>,
+    up_left_corner: Vec<SpriteRender>,
+    up_left_point: Vec<SpriteRender>,
+    up_right_corner: Vec<SpriteRender>,
+    up_right_point: Vec<SpriteRender>,
+    down_left_corner: Vec<SpriteRender>,
+    down_left_point: Vec<SpriteRender>,
+    down_right_corner: Vec<SpriteRender>,
+    down_right_point: Vec<SpriteRender>,
+}
+
+fn collect_named_sprites(regex: &str, named_sprites: &NamedSpriteSheet, sprite_sheet: Handle<SpriteSheet>) -> Vec<SpriteRender> {
+    let regex = Regex::new(regex).expect("regex failed to compile");
+
+    named_sprites
+        .sprites.iter().enumerate()
+        .filter(|(_, s)| regex.is_match(&s.name))
+        .map(|(i, _)| SpriteRender {
+            sprite_sheet: sprite_sheet.clone(),
+            sprite_number: i,
+        }).collect()
+}
+
 /// Holds handles to loaded assets for sprites and animations
 pub struct Sprites {
     character_1_sprite_render: SpriteRender,
     character_1_animation_set: AnimationSet<AnimationId, SpriteRender>,
+    tiles: Tiles,
 }
 
 impl Sprites {
@@ -128,9 +216,11 @@ impl Sprites {
         }
 
         let SpritesLoader {
-            named_sprites_handle,
-            named_animation_handle,
-            character_1_sheet_handle,
+            character_named_sprites_handle,
+            character_named_animation_handle,
+            character_sheet_handle,
+            tiles_sheet_handle,
+            tiles_named_sprites_handle,
             ..
         } = sprites_loader;
 
@@ -138,13 +228,13 @@ impl Sprites {
         {
             let named_sprites_storage = world.read_resource::<AssetStorage<NamedSpriteSheet>>();
             let named_sprites = named_sprites_storage
-                .get(&named_sprites_handle)
-                .expect(&format!("NamedSpriteSheet {:?} missing in Sprites::new", named_sprites_handle));
+                .get(&character_named_sprites_handle)
+                .expect(&format!("NamedSpriteSheet {:?} missing in Sprites::new", character_named_sprites_handle));
 
             let animation_set_storage = world.read_resource::<AssetStorage<NamedAnimationSet>>();
             let named_animations = animation_set_storage
-                .get(&named_animation_handle)
-                .expect(&format!("NamedAnimationSet {:?} missing in Sprites::new", named_animation_handle));
+                .get(&character_named_animation_handle)
+                .expect(&format!("NamedAnimationSet {:?} missing in Sprites::new", character_named_animation_handle));
 
             let mut sampler_storage = world.write_resource::<AssetStorage<Sampler<SpriteRenderPrimitive>>>();
             let mut animation_storage = world.write_resource::<AssetStorage<Animation<SpriteRender>>>();
@@ -181,13 +271,38 @@ impl Sprites {
         }
 
         let character_1_sprite_render = SpriteRender {
-            sprite_sheet: character_1_sheet_handle.clone(),
+            sprite_sheet: character_sheet_handle.clone(),
             sprite_number: 0,
         };
 
+        let tiles = {
+            let named_sprites_storage = world.read_resource::<AssetStorage<NamedSpriteSheet>>();
+            let named_sprites = named_sprites_storage
+                .get(&tiles_named_sprites_handle)
+                .expect(&format!("NamedSpriteSheet {:?} missing in Sprites::new", tiles_named_sprites_handle));
+
+            Tiles {
+                up: collect_named_sprites(r"walls_up_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                down: collect_named_sprites(r"walls_down_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                left: collect_named_sprites(r"walls_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                right: collect_named_sprites(r"walls_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                up_left_corner: collect_named_sprites(r"walls_corner_up_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                up_left_point: collect_named_sprites(r"walls_point_up_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                up_right_corner: collect_named_sprites(r"walls_corner_up_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                up_right_point: collect_named_sprites(r"walls_point_up_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                down_left_corner: collect_named_sprites(r"walls_corner_down_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                down_left_point: collect_named_sprites(r"walls_point_down_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                down_right_corner: collect_named_sprites(r"walls_corner_down_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                down_right_point: collect_named_sprites(r"walls_point_down_right_\d+", &named_sprites, tiles_sheet_handle.clone()),                
+            }
+        };
+
+        log::info!("{:#?}", tiles);
+
         Ok(Self {
             character_1_sprite_render,
-            character_1_animation_set
+            character_1_animation_set,
+            tiles,
         })
     }
 
@@ -199,6 +314,132 @@ impl Sprites {
             default_animation: None
         }
     }
+
+    pub fn get_tile(&self, tile: TileDirection) -> SpriteRender {
+        match tile {
+            TileDirection::Up => self.get_tile_up(),
+            TileDirection::Down => self.get_tile_down(),
+            TileDirection::Left => self.get_tile_left(),
+            TileDirection::Right => self.get_tile_right(),
+            TileDirection::UpLeftCorner => self.get_tile_up_left_corner(),
+            TileDirection::UpLeftPoint => self.get_tile_up_left_point(),
+            TileDirection::UpRightCorner => self.get_tile_up_right_corner(),
+            TileDirection::UpRightPoint => self.get_tile_up_right_point(),
+            TileDirection::DownLeftCorner => self.get_tile_down_left_corner(),
+            TileDirection::DownLeftPoint => self.get_tile_down_left_point(),
+            TileDirection::DownRightCorner => self.get_tile_down_right_corner(),
+            TileDirection::DownRightPoint => self.get_tile_down_right_point(),
+        }
+    }
+
+    pub fn get_tile_up(&self) -> SpriteRender {
+        self
+            .tiles
+            .up
+            .choose(&mut thread_rng())
+            .expect("tiles.up vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_down(&self) -> SpriteRender {
+        self
+            .tiles
+            .down
+            .choose(&mut thread_rng())
+            .expect("tiles.down vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_left(&self) -> SpriteRender {
+        self
+            .tiles
+            .left
+            .choose(&mut thread_rng())
+            .expect("tiles.left vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_right(&self) -> SpriteRender {
+        self
+            .tiles
+            .right
+            .choose(&mut thread_rng())
+            .expect("tiles.right vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_up_left_corner(&self) -> SpriteRender {
+        self
+            .tiles
+            .up_left_corner
+            .choose(&mut thread_rng())
+            .expect("tiles.up_left_corner vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_up_left_point(&self) -> SpriteRender {
+        self
+            .tiles
+            .up_left_point
+            .choose(&mut thread_rng())
+            .expect("tiles.up_left_point vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_up_right_corner(&self) -> SpriteRender {
+        self
+            .tiles
+            .up_right_corner
+            .choose(&mut thread_rng())
+            .expect("tiles.up_right_corner vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_up_right_point(&self) -> SpriteRender {
+        self
+            .tiles
+            .up_right_point
+            .choose(&mut thread_rng())
+            .expect("tiles.up_right_point vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_down_left_corner(&self) -> SpriteRender {
+        self
+            .tiles
+            .down_left_corner
+            .choose(&mut thread_rng())
+            .expect("tiles.down_left_corner vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_down_left_point(&self) -> SpriteRender {
+        self
+            .tiles
+            .down_left_point
+            .choose(&mut thread_rng())
+            .expect("tiles.down_left_point vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_down_right_corner(&self) -> SpriteRender {
+        self
+            .tiles
+            .down_right_corner
+            .choose(&mut thread_rng())
+            .expect("tiles.down_right_corner vec was empty!")
+            .clone()
+    }
+
+    pub fn get_tile_down_right_point(&self) -> SpriteRender {
+        self
+            .tiles
+            .down_right_point
+            .choose(&mut thread_rng())
+            .expect("tiles.down_right_point vec was empty!")
+            .clone()
+    }
+
 }
 
 pub struct AnimatedSpriteComponents {

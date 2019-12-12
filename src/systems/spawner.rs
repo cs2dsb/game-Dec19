@@ -58,7 +58,7 @@ impl Spawner {
             .with(Animation::default())
             .with(Transparent)
             .with(transform)
-            .with(Velocity::rand(10., 100.))
+            .with(Velocity::rand(10., 500.))
             .with(Age::default())
             //.with(DebugLinesComponent::new())
             ;

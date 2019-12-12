@@ -30,3 +30,9 @@ pub use age::*;
 
 mod murder;
 pub use murder::*;
+
+mod move_camera;
+pub use move_camera::*;
+
+mod map_generator;
+pub use map_generator::*;
