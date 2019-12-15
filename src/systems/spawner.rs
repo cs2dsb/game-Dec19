@@ -23,6 +23,7 @@ use crate::{
         Age,
     },
     resources::Sprites,
+    util::constants::CHARACTER_Z,
 };
 
 
@@ -46,7 +47,7 @@ impl Spawner {
             transform.set_translation_xyz(
                 random::<f32>() * screen_dimensions.width(),
                 random::<f32>() * screen_dimensions.height(),
-                0.,
+                CHARACTER_Z,
             );
             transform
         };

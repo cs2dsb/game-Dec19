@@ -9,3 +9,6 @@ pub use animation_id::*;
 
 mod named_sprite_animation;
 pub use named_sprite_animation::*;
+
+mod zoom;
+pub use zoom::*;

@@ -31,6 +31,7 @@ use regex::Regex;
 use rand::{
     thread_rng,
     seq::SliceRandom,
+    Rng,
 };
 use crate::resources::{
     AnimationId,
@@ -158,35 +159,42 @@ impl SpritesLoader {
     }
 }
 
+#[derive(Debug)]
 pub enum TileDirection {
-    Up,
-    Down,
-    Left,
-    Right,
-    UpLeftCorner,
-    UpLeftPoint,
-    UpRightCorner,
-    UpRightPoint,
-    DownLeftCorner,
-    DownLeftPoint,
-    DownRightCorner,
-    DownRightPoint,
+    East,
+    InnerCornerNorthEast,
+    InnerCornerNorthWest,
+    InnerCornerSouthEast,
+    InnerCornerSouthWest,
+    North,
+    OuterCornerNorthEast,
+    OuterCornerNorthWest,
+    OuterCornerSouthEast,
+    OuterCornerSouthWest,
+    Solid,
+    South,
+    West,
+    Blob(usize),
+    Floor,
 }
 
 #[derive(Debug)]
 pub struct Tiles {
-    up: Vec<SpriteRender>,
-    down: Vec<SpriteRender>,
-    left: Vec<SpriteRender>,
-    right: Vec<SpriteRender>,
-    up_left_corner: Vec<SpriteRender>,
-    up_left_point: Vec<SpriteRender>,
-    up_right_corner: Vec<SpriteRender>,
-    up_right_point: Vec<SpriteRender>,
-    down_left_corner: Vec<SpriteRender>,
-    down_left_point: Vec<SpriteRender>,
-    down_right_corner: Vec<SpriteRender>,
-    down_right_point: Vec<SpriteRender>,
+    east: Vec<SpriteRender>,
+    inner_corner_north_east: Vec<SpriteRender>,
+    inner_corner_north_west: Vec<SpriteRender>,
+    inner_corner_south_east: Vec<SpriteRender>,
+    inner_corner_south_west: Vec<SpriteRender>,
+    north: Vec<SpriteRender>,
+    outer_corner_north_east: Vec<SpriteRender>,
+    outer_corner_north_west: Vec<SpriteRender>,
+    outer_corner_south_east: Vec<SpriteRender>,
+    outer_corner_south_west: Vec<SpriteRender>,
+    solid: Vec<SpriteRender>,
+    south: Vec<SpriteRender>,
+    west: Vec<SpriteRender>,
+    blob: Vec<SpriteRender>,
+    floor: Vec<SpriteRender>,
 }
 
 fn collect_named_sprites(regex: &str, named_sprites: &NamedSpriteSheet, sprite_sheet: Handle<SpriteSheet>) -> Vec<SpriteRender> {
@@ -282,18 +290,21 @@ impl Sprites {
                 .expect(&format!("NamedSpriteSheet {:?} missing in Sprites::new", tiles_named_sprites_handle));
 
             Tiles {
-                up: collect_named_sprites(r"walls_up_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                down: collect_named_sprites(r"walls_down_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                left: collect_named_sprites(r"walls_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                right: collect_named_sprites(r"walls_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                up_left_corner: collect_named_sprites(r"walls_corner_up_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                up_left_point: collect_named_sprites(r"walls_point_up_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                up_right_corner: collect_named_sprites(r"walls_corner_up_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                up_right_point: collect_named_sprites(r"walls_point_up_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                down_left_corner: collect_named_sprites(r"walls_corner_down_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                down_left_point: collect_named_sprites(r"walls_point_down_left_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                down_right_corner: collect_named_sprites(r"walls_corner_down_right_\d+", &named_sprites, tiles_sheet_handle.clone()),
-                down_right_point: collect_named_sprites(r"walls_point_down_right_\d+", &named_sprites, tiles_sheet_handle.clone()),                
+                east: collect_named_sprites(r"dungeon_walls_east_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                inner_corner_north_east: collect_named_sprites(r"dungeon_walls_inner_corner_north_east_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                inner_corner_north_west: collect_named_sprites(r"dungeon_walls_inner_corner_north_west_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                inner_corner_south_east: collect_named_sprites(r"dungeon_walls_inner_corner_south_east_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                inner_corner_south_west: collect_named_sprites(r"dungeon_walls_inner_corner_south_west_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                north: collect_named_sprites(r"dungeon_walls_north_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                outer_corner_north_east: collect_named_sprites(r"dungeon_walls_outer_corner_north_east_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                outer_corner_north_west: collect_named_sprites(r"dungeon_walls_outer_corner_north_west_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                outer_corner_south_east: collect_named_sprites(r"dungeon_walls_outer_corner_south_east_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                outer_corner_south_west: collect_named_sprites(r"dungeon_walls_outer_corner_south_west_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                solid: collect_named_sprites(r"dungeon_walls_solid_\d+", &named_sprites, tiles_sheet_handle.clone()),
+                south: collect_named_sprites(r"dungeon_walls_south_\d+", &named_sprites, tiles_sheet_handle.clone()),  
+                west: collect_named_sprites(r"dungeon_walls_west_\d+", &named_sprites, tiles_sheet_handle.clone()),       
+                blob: collect_named_sprites(r"blob_\d+", &named_sprites, tiles_sheet_handle.clone()),    
+                floor: collect_named_sprites(r"dungeon_tiles_\d+", &named_sprites, tiles_sheet_handle.clone()),    
             }
         };
 
@@ -316,130 +327,36 @@ impl Sprites {
     }
 
     pub fn get_tile(&self, tile: TileDirection) -> SpriteRender {
-        match tile {
-            TileDirection::Up => self.get_tile_up(),
-            TileDirection::Down => self.get_tile_down(),
-            TileDirection::Left => self.get_tile_left(),
-            TileDirection::Right => self.get_tile_right(),
-            TileDirection::UpLeftCorner => self.get_tile_up_left_corner(),
-            TileDirection::UpLeftPoint => self.get_tile_up_left_point(),
-            TileDirection::UpRightCorner => self.get_tile_up_right_corner(),
-            TileDirection::UpRightPoint => self.get_tile_up_right_point(),
-            TileDirection::DownLeftCorner => self.get_tile_down_left_corner(),
-            TileDirection::DownLeftPoint => self.get_tile_down_left_point(),
-            TileDirection::DownRightCorner => self.get_tile_down_right_corner(),
-            TileDirection::DownRightPoint => self.get_tile_down_right_point(),
+        let (list, skew) = match tile {
+            TileDirection::East => (&self.tiles.east, true),
+            TileDirection::InnerCornerNorthEast => (&self.tiles.inner_corner_north_east, true),
+            TileDirection::InnerCornerNorthWest => (&self.tiles.inner_corner_north_west, true),
+            TileDirection::InnerCornerSouthEast => (&self.tiles.inner_corner_south_east, true),
+            TileDirection::InnerCornerSouthWest => (&self.tiles.inner_corner_south_west, true),
+            TileDirection::North => (&self.tiles.north, true),
+            TileDirection::OuterCornerNorthEast => (&self.tiles.outer_corner_north_east, true),
+            TileDirection::OuterCornerNorthWest => (&self.tiles.outer_corner_north_west, true),
+            TileDirection::OuterCornerSouthEast => (&self.tiles.outer_corner_south_east, true),
+            TileDirection::OuterCornerSouthWest => (&self.tiles.outer_corner_south_west, true),
+            TileDirection::Solid => (&self.tiles.solid, true),
+            TileDirection::South => (&self.tiles.south, true),
+            TileDirection::West => (&self.tiles.west, true),
+            TileDirection::Floor => (&self.tiles.floor, false),
+            TileDirection::Blob(n) => return self.tiles.blob[n].clone(),
+        };
+
+        let mut rng = thread_rng();
+        //We want mostly the first sprite from each set
+        let r: f32 = rng.gen();
+        if skew && r < 0.8 {
+            list[0].clone()
+        } else {
+            list
+                .choose(&mut rng)
+                .expect(&format!("Tile set for {:?} was empty!", tile))
+                .clone()        
         }
     }
-
-    pub fn get_tile_up(&self) -> SpriteRender {
-        self
-            .tiles
-            .up
-            .choose(&mut thread_rng())
-            .expect("tiles.up vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_down(&self) -> SpriteRender {
-        self
-            .tiles
-            .down
-            .choose(&mut thread_rng())
-            .expect("tiles.down vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_left(&self) -> SpriteRender {
-        self
-            .tiles
-            .left
-            .choose(&mut thread_rng())
-            .expect("tiles.left vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_right(&self) -> SpriteRender {
-        self
-            .tiles
-            .right
-            .choose(&mut thread_rng())
-            .expect("tiles.right vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_up_left_corner(&self) -> SpriteRender {
-        self
-            .tiles
-            .up_left_corner
-            .choose(&mut thread_rng())
-            .expect("tiles.up_left_corner vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_up_left_point(&self) -> SpriteRender {
-        self
-            .tiles
-            .up_left_point
-            .choose(&mut thread_rng())
-            .expect("tiles.up_left_point vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_up_right_corner(&self) -> SpriteRender {
-        self
-            .tiles
-            .up_right_corner
-            .choose(&mut thread_rng())
-            .expect("tiles.up_right_corner vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_up_right_point(&self) -> SpriteRender {
-        self
-            .tiles
-            .up_right_point
-            .choose(&mut thread_rng())
-            .expect("tiles.up_right_point vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_down_left_corner(&self) -> SpriteRender {
-        self
-            .tiles
-            .down_left_corner
-            .choose(&mut thread_rng())
-            .expect("tiles.down_left_corner vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_down_left_point(&self) -> SpriteRender {
-        self
-            .tiles
-            .down_left_point
-            .choose(&mut thread_rng())
-            .expect("tiles.down_left_point vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_down_right_corner(&self) -> SpriteRender {
-        self
-            .tiles
-            .down_right_corner
-            .choose(&mut thread_rng())
-            .expect("tiles.down_right_corner vec was empty!")
-            .clone()
-    }
-
-    pub fn get_tile_down_right_point(&self) -> SpriteRender {
-        self
-            .tiles
-            .down_right_point
-            .choose(&mut thread_rng())
-            .expect("tiles.down_right_point vec was empty!")
-            .clone()
-    }
-
 }
 
 pub struct AnimatedSpriteComponents {

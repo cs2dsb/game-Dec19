@@ -19,6 +19,7 @@ krita character_01_die_upright.kra --export-sequence --export-filename character
 krita character_01_die_downright.kra --export-sequence --export-filename character_01_die_downright_.png
 
 cp tileset/*.png .
+cp blob/*.png .
 
 rm -rf ../sprite_sheets/*.png ../sprite_sheets/*.ron
 sheep pack character_0*.png \
@@ -26,7 +27,7 @@ sheep pack character_0*.png \
 --packer maxrects \
 --pretty \
 --format amethyst_named
-sheep pack dungeon_walls_*.png \
+sheep pack dungeon_walls_*.png blob_*.png dungeon_tiles_*.png \
 --out ../sprite_sheets/tiles \
 --packer maxrects \
 --pretty \

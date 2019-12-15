@@ -20,6 +20,7 @@ use amethyst::{
         Processor,
     },
     input::{InputBundle, StringBindings},
+    controls::MouseFocusUpdateSystemDesc,
 };
 use log::LevelFilter;
 
@@ -104,7 +105,11 @@ pub fn run() -> amethyst::Result<()> {
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderDebugLines::default()),
         )?
-        .with_bundle(systems::Bundle)?;
+        .with_bundle(systems::Bundle)?
+        .with_system_desc(
+            MouseFocusUpdateSystemDesc::default(),
+            "mouse_focus_update_system",
+            &[]);
 
     let mut builder = Application::build(
         assets_path, 
