@@ -8,6 +8,7 @@ use amethyst::{
         Builder,
         ReadStorage,
         Join,
+        ReadExpect,
     },
     utils::fps_counter::FpsCounter,
     renderer::{
@@ -25,14 +26,16 @@ use crate::{
     },
     resources::Sprites,
     util::{
-        constants::CHARACTER_Z,
+        constants::CHARACTER_Z_OFFSET,
         iso_to_screen,
     },
+    config::Spawner as SpawnerConfig,
 };
 use rand::{
     thread_rng,
     seq::SliceRandom,
 };
+use std::usize;
 
 #[derive(Default)]
 pub struct Spawner {
@@ -48,6 +51,7 @@ impl Spawner {
         lazy_update: &LazyUpdate,
         sprites_resource: &Read<Sprites>,
         map: &Map,
+        spawner_config: &SpawnerConfig,
     ) {
         if let Some(room) = map
                     .rooms()
@@ -55,10 +59,12 @@ impl Spawner {
         {
             let centre = room.centre();
             let (map_x, map_y) = (centre.x, centre.z);
-            let (x, y) = iso_to_screen(map_x, map_y);
             let transform = {
+                let mut screen_pos = iso_to_screen(map_x, map_y);
+                screen_pos.z += CHARACTER_Z_OFFSET;
+                
                 let mut transform = Transform::default();
-                transform.set_translation_xyz(x, y, CHARACTER_Z);
+                transform.set_translation(screen_pos);
                 transform
             };
             let navigator = Navigator {
@@ -72,8 +78,11 @@ impl Spawner {
                 .with(Animation::default())
                 .with(Transparent)
                 .with(transform)
-                .with(Velocity::rand(0.2, 10.))//500. / 60.))
-                .with(Age::default())
+                .with(Velocity::rand(spawner_config.min_speed, spawner_config.max_speed))
+                .with(Age {
+                    age: 0.,
+                    max_age: spawner_config.max_age,
+                })
                 .with(navigator)
                 .with(DebugLinesComponent::new())
                 ;
@@ -94,6 +103,7 @@ impl<'s> System<'s> for Spawner {
         Read<'s, Time>,
         Read<'s, FpsCounter>,
         ReadStorage<'s, Map>,
+        ReadExpect<'s, SpawnerConfig>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -104,6 +114,7 @@ impl<'s> System<'s> for Spawner {
             time,
             fps,
             maps,
+            spawner_config,
         ) = data;
 
         if sprites_resource.is_none() { 
@@ -126,15 +137,16 @@ impl<'s> System<'s> for Spawner {
         let delta_seconds = time.delta_seconds();
         self.elapsed += delta_seconds;
 
-        if self.elapsed >= 0.2 {
-            self.elapsed -= 0.2;
+        if self.elapsed >= spawner_config.spawn_delay {
+            self.elapsed -= spawner_config.spawn_delay ;
             let fps = fps.sampled_fps();
-            if fps > 59.5  && self.count < 10000 {
+            if fps > 59.5  && self.count < spawner_config.max_spawns.unwrap_or(usize::MAX) {
                 self.spawn_boid(
                     &entities,
                     &lazy_update,
                     &sprites_resource.unwrap(),
                     &map.unwrap(),
+                    &spawner_config,
                 );
             }
         }

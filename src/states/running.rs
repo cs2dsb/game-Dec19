@@ -6,7 +6,10 @@ use amethyst::{
     window::ScreenDimensions,
     controls::WindowFocus,
 };
-use crate::resources::Zoom;
+use crate::{
+    resources::Zoom,
+    util::constants::CAMERA_Z,
+};
 
 const ZOOM_MAX: f32 = 2.5;
 const ZOOM_MIN: f32 = 0.3;
@@ -65,7 +68,7 @@ fn init_camera(world: &mut World) {
     // Center the camera in the middle of the screen, and let it cover
     // the entire screen
     let mut transform = Transform::default();
-    transform.set_translation_xyz(width * 0.5, height * 0.5, 10.);
+    transform.set_translation_xyz(width * 0.5, height * 0.5, CAMERA_Z);
 
     world
         .create_entity()

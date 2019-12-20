@@ -1,20 +1,32 @@
+#![enable(implicit_some)]
 (
-  map: (
-    width: 64,
-    height: 64,
-    room_place_max_iterations: 400,
-    corridor_turn_chance: 0.8,
-    superfluous_doors_per_room: 0.0,
-    room_sizes: [
-      (name: "Small", frequency: 0.1, min_size: (4, 4), max_size: (8, 8)),
-      (name: "Medium", frequency: 0.2, min_size: (8, 8), max_size: (12, 12)),
-      (name: "Large", frequency: 0.2, min_size: (12, 12), max_size: (18, 18)),
-      (name: "Huge", frequency: 0.1, min_size: (18, 18), max_size: (25, 25)),
-    ],
-    entity: (
-      unit_size: 1.0,
-      wall_height: 1.0,
+    debug_draw: (
+        pathfinding: false,
+        velocity: false,
     ),
-    physics_load_radius: 10.0,
-  )
+    spawner: (
+        spawn_delay: 0.,
+        min_speed: 0.1,
+        max_speed: 10.,
+        //max_spawns: 10,
+        max_age: 10.,
+    ),
+    map: (
+        width: 64,
+        height: 64,
+        room_place_max_iterations: 400,
+        corridor_turn_chance: 0.8,
+        superfluous_doors_per_room: 0.0,
+        room_sizes: [
+            (name: "Small", frequency: 0.1, min_size: (4, 4), max_size: (8, 8)),
+            (name: "Medium", frequency: 0.2, min_size: (8, 8), max_size: (12, 12)),
+            (name: "Large", frequency: 0.2, min_size: (12, 12), max_size: (18, 18)),
+            (name: "Huge", frequency: 0.05, min_size: (18, 18), max_size: (25, 25)),
+        ],
+        entity: (
+            unit_size: 1.0,
+            wall_height: 1.0,
+        ),
+        physics_load_radius: 10.0,
+    )
 )

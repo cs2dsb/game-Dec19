@@ -6,9 +6,17 @@ use serde::{Serialize, Deserialize};
 pub mod map;
 pub use self::map::Map;
 
+pub mod spawner;
+pub use self::spawner::Spawner;
+
+pub mod debug_draw;
+pub use self::debug_draw::DebugDraw;
+
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub struct Game {
     pub map: Map,
+    pub spawner: Spawner,
+    pub debug_draw: DebugDraw,
 }
 
 impl Game {
@@ -18,5 +26,7 @@ impl Game {
     {
         builder
             .with_resource(self.map)
+            .with_resource(self.spawner)
+            .with_resource(self.debug_draw)
     }
 }

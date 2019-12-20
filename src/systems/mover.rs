@@ -22,7 +22,7 @@ use crate::{
         Navigator,
     },
     util::{
-        constants::CHARACTER_Z,
+        constants::CHARACTER_Z_OFFSET,
         set_magnitude,
         iso_to_screen,
     },
@@ -73,15 +73,16 @@ impl<'s> System<'s> for Mover {
                 let lerp_time = elapsed_time.min(travel_time);
                 let pos = prev_pos + v.velocity * lerp_time.as_secs_f32();
 
-                let (x, y) = iso_to_screen(pos.x, pos.y);
                 let (prev_x, prev_y) = {
                     let t = t.translation();
                     (t.x, t.y)
                 };
-                t.set_translation_xyz(x, y, CHARACTER_Z);
+                let mut screen_pos = iso_to_screen(pos.x, pos.y);
+                screen_pos.z += CHARACTER_Z_OFFSET;
+                t.set_translation(screen_pos);
 
                 //TODO: This is so the heading system works, probably fix it so heading is aware of map space velocity instead of screen space?
-                v.velocity = Vector2::new(x, y) - Vector2::new(prev_x, prev_y);
+                v.velocity = Vector2::new(screen_pos.x, screen_pos.y) - Vector2::new(prev_x, prev_y);
             } else {
                t.prepend_translation_x(v.velocity.x * time.delta_seconds());
                t.prepend_translation_y(v.velocity.y * time.delta_seconds());

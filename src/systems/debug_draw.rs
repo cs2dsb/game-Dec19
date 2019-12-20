@@ -16,6 +16,7 @@ use amethyst::{
         System, 
         WriteStorage, 
         Entities,
+        ReadExpect,
     },
 };
 
@@ -28,7 +29,11 @@ use crate::{
         Path,
         Color,
     },
-    util::iso_to_screen,
+    util::{
+        iso_to_screen,
+        constants::DEBUG_Z,
+    },
+    config::DebugDraw as DebugDrawConfig,
 };
 
 pub struct DebugDraw;
@@ -41,6 +46,7 @@ impl<'s> System<'s> for DebugDraw {
         ReadStorage<'s, Path>,
         WriteStorage<'s, DebugLinesComponent>,
         WriteStorage<'s, Color>,
+        ReadExpect<'s, DebugDrawConfig>,
     );
 
     fn run(&mut self, (
@@ -50,6 +56,7 @@ impl<'s> System<'s> for DebugDraw {
         paths,
         mut debug_comps,
         mut colors,
+        config,
     ): Self::SystemData) {
         #[cfg(feature = "profiler")]
         profile_scope!("debug_draw_system");
@@ -73,32 +80,36 @@ impl<'s> System<'s> for DebugDraw {
             &mut debug_comps,
             &colors,
         ).join() {
-            let origin = Point3::from(*t.translation());
-            let ve = Vector3::new(v.velocity.x, v.velocity.y, 0.);
+            if config.velocity {
+                let origin = Point3::from(*t.translation());
+                let ve = Vector3::new(v.velocity.x, v.velocity.y, 0.);
             
-            debug.add_line(
-                origin,
-                origin + ve * 60.,
-                Srgba::new(1., 1., 1., 1.),
-            );
+                debug.add_line(
+                    origin,
+                    origin + ve * 60.,
+                    Srgba::new(1., 1., 1., 1.),
+                );
+            }
 
-            if let Some(path) = &p.path {
-                let color: Srgba = c.clone().into();
-                for i in 1..path.0.len() {
-                    let prev = &path.0[i-1];
-                    let current = &path.0[i];
+            if config.pathfinding {
+                if let Some(path) = &p.path {
+                    let color: Srgba = c.clone().into();
+                    for i in 1..path.0.len() {
+                        let prev = &path.0[i-1];
+                        let current = &path.0[i];
 
-                    let (x, y) = iso_to_screen(prev.x as f32, prev.y as f32);
-                    let origin = Point3::new(x, y, 0.5);
-                    
-                    let (x, y) = iso_to_screen(current.x as f32, current.y as f32);
-                    let end = Point3::new(x, y, 0.5);
+                        let sp = iso_to_screen(prev.x as f32, prev.y as f32);
+                        let origin = Point3::new(sp.x, sp.y, DEBUG_Z);
+                        
+                        let sp = iso_to_screen(current.x as f32, current.y as f32);
+                        let end = Point3::new(sp.x, sp.y, DEBUG_Z);
 
-                    debug.add_line(
-                        origin,
-                        end,
-                        color,
-                    );
+                        debug.add_line(
+                            origin,
+                            end,
+                            color,
+                        );
+                    }
                 }
             }
         }

@@ -71,7 +71,7 @@ pub fn run() -> amethyst::Result<()> {
     let binding_config_path = config_path.join("binding_config.ron");
     let game_config_path = config_path.join("game_config.ron");
 
-    let game_config = config::Game::load(&game_config_path);
+    let game_config = config::Game::load_no_fallback(&game_config_path).expect("Failed to load game config");
 
     let game_data = GameDataBuilder::default()
         .with(Processor::<resources::NamedSpriteSheet>::new(), "", &[])

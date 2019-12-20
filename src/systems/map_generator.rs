@@ -20,8 +20,8 @@ use crate::{
     },
     util::{
         constants::{
-            FLOOR_Z,
-            WALL_Z,
+            FLOOR_Z_OFFSET,
+            WALL_Z_OFFSET,
         },
         iso_to_screen,
     }
@@ -172,12 +172,15 @@ impl<'s> System<'s> for MapGenerator {
                         }
                     };
 
+
                     create_tile(
                         &entities,
                         &lazy_update,
                         sprites.as_ref().expect("Missing sprites resource"),
                         TileDirection::Floor,
-                        (x as f32, y as f32, FLOOR_Z),
+                        x as f32, 
+                        y as f32, 
+                        FLOOR_Z_OFFSET,
                     );
 
                     if let Some(wall) = wall {
@@ -186,7 +189,9 @@ impl<'s> System<'s> for MapGenerator {
                             &lazy_update,
                             sprites.as_ref().expect("Missing sprites resource"),
                             wall,
-                            (x as f32, y as f32, WALL_Z),
+                            x as f32, 
+                            y as f32, 
+                            WALL_Z_OFFSET,
                         );
                     }
                 }
@@ -204,12 +209,16 @@ fn create_tile(
         lazy_update: &LazyUpdate,
         sprites_resource: &Sprites,
         direction: TileDirection,
-        (x, y, z): (f32, f32, f32),
+        x: f32,
+        y: f32,
+        z_offset: f32
 ) {
-    let (x, y) = iso_to_screen(x, y);
     let transform = {
+        let mut screen_pos = iso_to_screen(x, y);
+        screen_pos.z += z_offset;
+
         let mut transform = Transform::default();
-        transform.set_translation_xyz(x, y, z);
+        transform.set_translation(screen_pos);
         transform
     };
 
