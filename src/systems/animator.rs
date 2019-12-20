@@ -31,6 +31,19 @@ impl<'s> System<'s> for Animator {
     );
 
     fn run(&mut self, (entities, mut animation, animation_sets, mut animation_control_sets): Self::SystemData) {
+        let mut missing_control_set = Vec::new();
+        for (e, _, _, a) in (&entities, &animation_sets, !&animation_control_sets, &mut animation).join() {
+            // TODO: why does this happen? It only started happening since I implemented pathfinding and had the velocity updated from the prev position
+            log::warn!("Found animated entity without animation_control_set: {:?}", e);
+            missing_control_set.push(e);
+            a.current = None;
+        }
+
+        for e in missing_control_set {
+            animation_control_sets.insert(e, AnimationControlSet::default())
+                .expect("Failed to insert AnimationControlSet component");
+        }
+
         let mut died = Vec::new();
         for (e, animation_set, control_set, a) in (&entities, &animation_sets, &mut animation_control_sets, &mut animation).join() {
             if a.next != a.current {
@@ -53,7 +66,7 @@ impl<'s> System<'s> for Animator {
                         1.0,
                         AnimationCommand::Start,
                     );
-                }
+                } 
                 a.current = a.next;
                 a.is_done = false;
             }
@@ -66,5 +79,6 @@ impl<'s> System<'s> for Animator {
         for e in died {
             animation.remove(e);
         }
+
     }    
 }

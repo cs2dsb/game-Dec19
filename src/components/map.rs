@@ -137,6 +137,10 @@ impl MapObject {
 		&self.entity
 	}
 
+	pub fn centre(&self) -> Vector3<f32> {
+		self.pos + 0.5 * self.size
+	}
+
 	pub fn set_entity(&mut self, entity: Entity) {
 		if self.entity.is_some() {
 			panic!("Attempted to set MapObject.entity twice");

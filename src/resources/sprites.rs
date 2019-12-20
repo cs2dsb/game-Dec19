@@ -159,7 +159,7 @@ impl SpritesLoader {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum TileDirection {
     East,
     InnerCornerNorthEast,

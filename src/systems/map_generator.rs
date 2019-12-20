@@ -18,10 +18,13 @@ use crate::{
         Sprites,
         TileDirection,
     },
-    util::constants::{
-        FLOOR_Z,
-        WALL_Z,
-    },
+    util::{
+        constants::{
+            FLOOR_Z,
+            WALL_Z,
+        },
+        iso_to_screen,
+    }
 };
 
 pub struct MapGenerator;
@@ -77,16 +80,6 @@ fn tile_map(neigh: u32) -> u32 {
         255 => 46,
         _ => unreachable!(),
     }
-}
-
-const TILE_W: f32 = 32.;
-const TILE_H: f32 = 32.;
-
-fn iso_to_screen(x: f32, y: f32) -> (f32, f32) {
-    (
-        (x - y) * TILE_W,
-        (x + y) * TILE_H / 2.,
-    )
 }
 
 impl<'s> System<'s> for MapGenerator {

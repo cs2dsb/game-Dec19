@@ -3,7 +3,7 @@
     width: 64,
     height: 64,
     room_place_max_iterations: 400,
-    corridor_turn_chance: 0.1,
+    corridor_turn_chance: 0.8,
     superfluous_doors_per_room: 0.0,
     room_sizes: [
       (name: "Small", frequency: 0.1, min_size: (4, 4), max_size: (8, 8)),

@@ -30,8 +30,8 @@ fn create_paths(
     let mut add_to = Vec::new();
 
     // Find navigators with no path components that don't have them
-    for (e, _, _) in (entities, navigators, !paths).join() {
-        add_to.push(e);
+    for (e, n, _) in (entities, navigators, !paths).join() {
+        add_to.push((e, n));
     }        
 
     if add_to.len() > 0 {
@@ -72,10 +72,9 @@ fn create_paths(
                 }
             }
 
-            let origin = PathNode::new(x0 as i32, y0 as i32);
             let objective = PathNode::new(x1 as i32, y1 as i32);
-
-            for e in add_to {
+            for (e, n) in add_to {
+                let origin = PathNode::new(n.x as i32, n.y as i32);
                 let path = Path::new(
                     map,
                     origin,

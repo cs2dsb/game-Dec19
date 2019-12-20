@@ -116,7 +116,7 @@ pub fn run() -> amethyst::Result<()> {
         states::Loading::default(),
     )?;
     builder = game_config.register(builder);
-    //builder = components::register_components(builder);
+    builder = components::register_components(builder);
     
     let mut game = builder
         .build(game_data)?;

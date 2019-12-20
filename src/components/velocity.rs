@@ -28,6 +28,7 @@ const X_AXIS: Unit<Vector2<f32>> = unsafe {
 pub struct Velocity {
     pub velocity: Vector2<f32>,
     pub max_speed: f32,
+    pub speed: f32,
 }
 
 impl Component for Velocity {
@@ -36,9 +37,12 @@ impl Component for Velocity {
 
 impl Velocity {
     pub fn new(x: f32, y: f32, max_speed: f32) -> Self {
+        let velocity = Vector2::new(x, y);
+        let speed = velocity.magnitude();
         Self {
-            velocity: Vector2::new(x, y),
+            velocity,
             max_speed,
+            speed,
         }
     }
 
@@ -51,10 +55,7 @@ impl Velocity {
             .normalize()
             * mag;
 
-        Self {
-            velocity, 
-            max_speed: max,
-        }
+        Self::new(velocity.x, velocity.y, max)
     }
 
     pub fn clamp(&mut self) {
