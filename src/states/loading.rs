@@ -40,7 +40,7 @@ impl SimpleState for Loading {
                     // Insert it into the world
                     data.world.insert(sprites);
                     
-                    Trans::Switch(Box::new(Running))
+                    Trans::Switch(Box::new(Running::default()))
                 },
                 Completion::Failed => {
                     log::error!("Failed to load assets, exiting");

@@ -2,6 +2,7 @@ use amethyst::{
     core::{
         timing::Time,
         transform::Transform,
+        math::Vector3,
     },
     ecs::prelude::{
         Join, 
@@ -9,12 +10,13 @@ use amethyst::{
         WriteStorage,
         Read,
         ReadExpect,
+        Write,
     },
     renderer::{Camera, camera::Projection},
     input::{InputHandler, StringBindings},
     window::ScreenDimensions,
 };
-use crate::resources::Zoom;
+use crate::resources::{Zoom, CameraMove};
 
 const MOVE_VELOCITY: f32 = 1000.;
 
@@ -28,9 +30,10 @@ impl<'s> System<'s> for MoveCamera {
         Read<'s, InputHandler<StringBindings>>,
         Read<'s, Zoom>,
         ReadExpect<'s, ScreenDimensions>,
+        Write<'s, CameraMove>,
     );
 
-    fn run(&mut self, (mut cameras, mut transforms, time, input, zoom, screen_dims): Self::SystemData) {
+    fn run(&mut self, (mut cameras, mut transforms, time, input, zoom, screen_dims, mut camera_move): Self::SystemData) {
         let delta_seconds = time.delta_seconds();
         for (camera, transform) in (&mut cameras, &mut transforms).join() {
             let x = input.axis_value("move_x").expect("Missing move_x input");
@@ -38,6 +41,8 @@ impl<'s> System<'s> for MoveCamera {
 
             transform.prepend_translation_x(MOVE_VELOCITY * x * delta_seconds);
             transform.prepend_translation_y(MOVE_VELOCITY * y * delta_seconds);
+
+            transform.prepend_translation(camera_move.delta);
 
             let half_width = screen_dims.width() * 0.5 * zoom.zoom;
             let half_height = screen_dims.height() * 0.5 * zoom.zoom;
@@ -49,5 +54,7 @@ impl<'s> System<'s> for MoveCamera {
                 _ => {},
             }
         }
+
+        camera_move.delta = Vector3::zeros();
     }
 }

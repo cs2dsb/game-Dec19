@@ -160,7 +160,7 @@ impl<'s> System<'s> for MapGenerator {
                                 13 | 18 => TileDirection::OuterCornerNorthEast,
                                 2 | 3 => TileDirection::OuterCornerSouthWest,
 
-                                32 => TileDirection::Solid,
+                                32 | 30 => TileDirection::Solid,
                                 //This is a bad match (it's a single column)
                                 0 => TileDirection::OuterCornerSouthEast,
 
