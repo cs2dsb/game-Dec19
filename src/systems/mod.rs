@@ -36,3 +36,6 @@ pub use move_camera::*;
 
 mod map_generator;
 pub use map_generator::*;
+
+mod pathfinder;
+pub use pathfinder::*;

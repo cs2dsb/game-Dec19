@@ -12,6 +12,7 @@ use crate::systems::{
     Murder,
     MoveCamera,
     MapGenerator,
+    PathFinder,
 };
 use amethyst::{
     core::{
@@ -44,6 +45,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for Bundle {
         builder.add(Murder, "murder_system", &["age_system"]);
         builder.add(Animator, "animator_system", &["heading_system", "murder_system"]);  
         builder.add(MoveCamera, "move_camera_system", &[]);
+        builder.add(PathFinder, "path_finder_system", &[]);
         Ok(())
     }
 }

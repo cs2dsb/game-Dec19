@@ -33,6 +33,9 @@ union Transmute<T: Copy, U: Copy> {
 		to: U,
 }
 
+const DIAGONAL_COST: i32 = 142;
+const STRAIGHT_COST: i32 = 100;
+
 //This transmute hack is because nalgebra doesn't support const fn constructors for now
 const NEIGHBOUR_UP: Vector2<i8> = unsafe { Transmute::<[i8; 2], Vector2<i8>> { from: [0, -1] }.to };
 const NEIGHBOUR_DOWN: Vector2<i8> = unsafe { Transmute::<[i8; 2], Vector2<i8>> { from: [0, 1] }.to };
@@ -43,20 +46,30 @@ const NEIGHBOUR_UP_RIGHT: Vector2<i8> = unsafe { Transmute::<[i8; 2], Vector2<i8
 const NEIGHBOUR_DOWN_LEFT: Vector2<i8> = unsafe { Transmute::<[i8; 2], Vector2<i8>> { from: [-1, 1] }.to };
 const NEIGHBOUR_DOWN_RIGHT: Vector2<i8> = unsafe { Transmute::<[i8; 2], Vector2<i8>> { from: [1, 1] }.to };
 const NEIGHBOURS_4: [Vector2<i8>; 4] = [
-		NEIGHBOUR_UP,
-		NEIGHBOUR_DOWN,
-		NEIGHBOUR_LEFT,
-		NEIGHBOUR_RIGHT,
+	NEIGHBOUR_UP,
+	NEIGHBOUR_DOWN,
+	NEIGHBOUR_LEFT,
+	NEIGHBOUR_RIGHT,
 ];
 const NEIGHBOURS_8: [Vector2<i8>; 8] = [
-		NEIGHBOUR_UP,
-		NEIGHBOUR_DOWN,
-		NEIGHBOUR_LEFT,
-		NEIGHBOUR_RIGHT,
-		NEIGHBOUR_UP_LEFT,
-		NEIGHBOUR_UP_RIGHT,
-		NEIGHBOUR_DOWN_LEFT,
-		NEIGHBOUR_DOWN_RIGHT,
+	NEIGHBOUR_UP,
+	NEIGHBOUR_DOWN,
+	NEIGHBOUR_LEFT,
+	NEIGHBOUR_RIGHT,
+	NEIGHBOUR_UP_LEFT,
+	NEIGHBOUR_UP_RIGHT,
+	NEIGHBOUR_DOWN_LEFT,
+	NEIGHBOUR_DOWN_RIGHT,
+];
+const NEIGHBOURS_WITH_COST: [(Vector2<i8>, i32); 8] = [
+	(NEIGHBOUR_UP, STRAIGHT_COST),
+	(NEIGHBOUR_DOWN, STRAIGHT_COST),
+	(NEIGHBOUR_LEFT, STRAIGHT_COST),
+	(NEIGHBOUR_RIGHT, STRAIGHT_COST),
+	(NEIGHBOUR_UP_LEFT, DIAGONAL_COST),
+	(NEIGHBOUR_UP_RIGHT, DIAGONAL_COST),
+	(NEIGHBOUR_DOWN_LEFT, DIAGONAL_COST),
+	(NEIGHBOUR_DOWN_RIGHT, DIAGONAL_COST),
 ];
 
 
@@ -781,6 +794,21 @@ impl Map {
 		} else {
 			true
 		}
+	}
+
+	pub fn successors(&self, (x, y): (usize, usize)) -> Vec<((usize, usize), i32)>{
+		let mut res = Vec::new();
+
+		for (n, cost) in NEIGHBOURS_WITH_COST.iter() {
+			if let Some(n) = self.resolve_neighbour((x, y), n) {
+				match self.state[n] {
+                    Wall => continue,
+                    _ => res.push((n, *cost)),
+                }
+			}
+		}
+
+		res
 	}
 }
 

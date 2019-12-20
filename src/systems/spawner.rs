@@ -11,7 +11,7 @@ use amethyst::{
     utils::fps_counter::FpsCounter,
     window::ScreenDimensions,
     renderer::{
-        //debug_drawing::DebugLinesComponent,
+        debug_drawing::DebugLinesComponent,
         Transparent,
     },
 };
@@ -21,6 +21,7 @@ use crate::{
         Velocity,
         Animation,
         Age,
+        Navigator,
     },
     resources::Sprites,
     util::constants::CHARACTER_Z,
@@ -61,7 +62,8 @@ impl Spawner {
             .with(transform)
             .with(Velocity::rand(10., 500.))
             .with(Age::default())
-            //.with(DebugLinesComponent::new())
+            .with(Navigator)
+            .with(DebugLinesComponent::new())
             ;
 
         builder = sprite_components.apply(builder);

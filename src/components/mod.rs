@@ -9,3 +9,9 @@ pub use age::*;
 
 mod map;
 pub use map::*;
+
+mod navigator;
+pub use navigator::*;
+
+mod path;
+pub use path::*;
