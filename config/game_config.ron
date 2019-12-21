@@ -3,13 +3,18 @@
     debug_draw: (
         pathfinding: false,
         velocity: false,
+        tower_range: false,
+        tower_target: true,
+        tower_los: false,
     ),
     spawner: (
         spawn_delay: 1.,
         min_speed: 0.1,
-        max_speed: 10.,
+        max_speed: 2.2,
         //max_spawns: 10,
-        max_age: 10.,
+        max_age: 100.,
+        tower_range: 10.,
+        max_towers: 20,
     ),
     map: (
         width: 64,

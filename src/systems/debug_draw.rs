@@ -6,6 +6,7 @@ use amethyst::{
     core::{
         transform::Transform,
         math::{
+            Vector2,
             Vector3,
             Point3,
         },
@@ -28,9 +29,13 @@ use crate::{
         Velocity,
         Path,
         Color,
+        Tower,
+        Map,
     },
     util::{
         iso_to_screen,
+        TILE_W,
+        TILE_H,
         constants::DEBUG_Z,
     },
     config::DebugDraw as DebugDrawConfig,
@@ -44,9 +49,11 @@ impl<'s> System<'s> for DebugDraw {
         ReadStorage<'s, Transform>,
         ReadStorage<'s, Velocity>,
         ReadStorage<'s, Path>,
+        ReadStorage<'s, Tower>,
         WriteStorage<'s, DebugLinesComponent>,
         WriteStorage<'s, Color>,
         ReadExpect<'s, DebugDrawConfig>,
+        ReadStorage<'s, Map>,
     );
 
     fn run(&mut self, (
@@ -54,9 +61,11 @@ impl<'s> System<'s> for DebugDraw {
         transforms, 
         velocities, 
         paths,
+        towers,
         mut debug_comps,
         mut colors,
         config,
+        maps,
     ): Self::SystemData) {
         #[cfg(feature = "profiler")]
         profile_scope!("debug_draw_system");
@@ -73,45 +82,132 @@ impl<'s> System<'s> for DebugDraw {
             colors.insert(e, color).expect("Failed to insert color component");
         }
 
-        for (t, v, p, debug, c) in (
-            &transforms, 
-            &velocities,
-            &paths,
-            &mut debug_comps,
-            &colors,
-        ).join() {
+        for (entity, transform, debug, color) in (&entities, &transforms, &mut debug_comps, &colors).join() {
             if config.velocity {
-                let origin = Point3::from(*t.translation());
-                let ve = Vector3::new(v.velocity.x, v.velocity.y, 0.);
-            
-                debug.add_line(
-                    origin,
-                    origin + ve * 60.,
-                    Srgba::new(1., 1., 1., 1.),
-                );
+                if let Some(velocity) = velocities.get(entity) {
+                    let mut origin = Point3::from(*transform.translation());
+                    origin.z = DEBUG_Z / 2.;
+                    let ve = Vector3::new(velocity.velocity.x, velocity.velocity.y, 0.);
+                
+                    debug.add_line(
+                        origin,
+                        origin + ve * 60.,
+                        Srgba::new(1., 1., 1., 1.),
+                    );
+                }
             }
 
             if config.pathfinding {
-                if let Some(path) = &p.path {
-                    let color: Srgba = c.clone().into();
-                    for i in 1..path.0.len() {
-                        let prev = &path.0[i-1];
-                        let current = &path.0[i];
+                if let Some(path) = paths.get(entity) {
+                    if let Some(path) = &path.path {
+                        let color: Srgba = color.clone().into();
+                        for i in 1..path.0.len() {
+                            let prev = &path.0[i-1];
+                            let current = &path.0[i];
 
-                        let sp = iso_to_screen(prev.x as f32, prev.y as f32);
-                        let origin = Point3::new(sp.x, sp.y, DEBUG_Z);
-                        
-                        let sp = iso_to_screen(current.x as f32, current.y as f32);
-                        let end = Point3::new(sp.x, sp.y, DEBUG_Z);
+                            let sp = iso_to_screen(prev.clone().into());
+                            let origin = Point3::new(sp.x, sp.y, DEBUG_Z);
+                            
+                            let sp = iso_to_screen(current.clone().into());
+                            let end = Point3::new(sp.x, sp.y, DEBUG_Z);
 
-                        debug.add_line(
+                            debug.add_line(
+                                origin,
+                                end,
+                                color,
+                            );
+                        }
+                    }
+                }
+            }
+
+            if config.tower_range || config.tower_target {
+                if let Some(tower) = towers.get(entity) {
+                    let color: Srgba = color.clone().into();
+
+                    let mut origin = Point3::from(*transform.translation());
+                    origin.z = DEBUG_Z;
+
+                    if config.tower_range {
+                        add_ellipse_2d(
+                            debug,
                             origin,
-                            end,
+                            tower.range * TILE_W * 2_f32.sqrt(),
+                            tower.range * TILE_H * 2_f32.sqrt(),
+                            20,
                             color,
                         );
+                    }
+
+                    let mut map = None;
+
+                    if config.tower_los {
+                        for (e, m) in (&entities, &maps).join() {
+                            if !entities.is_alive(e) { continue }
+                            map = Some(m);
+                            break;
+                        }
+                    }
+
+                    if config.tower_target {
+                        if let Some(target) = tower.target {
+                            if let Some(target_transform) = transforms.get(target) {
+                                if let Some(map) = map {
+                                    if let (Some(origin), Some(target)) = (
+                                        map.world_to_cell_index(transform.translation().xy()),
+                                        map.world_to_cell_index(target_transform.translation().xy())
+                                    ) {
+                                        for visit in map.ray_visit(origin, target) {
+                                            let pos = iso_to_screen(Vector2::new(visit.0 as f32, visit.1 as f32));
+                                            let screen = Point3::new(pos.x, pos.y, DEBUG_Z);
+                                            
+                                            debug.add_circle_2d(
+                                                screen,
+                                                10.,
+                                                20,
+                                                color,
+                                            );                                            
+                                        }
+                                    }
+                                }                                
+
+                                let mut target = Point3::from(*target_transform.translation());
+                                target.z = DEBUG_Z;
+
+                                debug.add_circle_2d(
+                                    target,
+                                    10.,
+                                    20,
+                                    color,
+                                );   
+
+                                debug.add_line(
+                                    origin,
+                                    target,
+                                    color,
+                                );
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+pub fn add_ellipse_2d(debug: &mut DebugLinesComponent, center: Point3<f32>, radius_x: f32, radius_y: f32, points: u32, color: Srgba) {
+    let mut prev = None;
+
+    for i in 0..=points {
+        let a = std::f32::consts::PI * 2.0 / (points as f32) * (i as f32);
+        let x = radius_x * a.cos();
+        let y = radius_y * a.sin();
+        let point = [center[0] + x, center[1] + y, center[2]].into();
+
+        if let Some(prev) = prev {
+            debug.add_line(prev, point, color);
+        }
+
+        prev = Some(point);
     }
 }

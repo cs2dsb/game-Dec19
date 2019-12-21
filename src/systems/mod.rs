@@ -39,3 +39,6 @@ pub use map_generator::*;
 
 mod pathfinder;
 pub use pathfinder::*;
+
+mod tower_aim;
+pub use tower_aim::*;

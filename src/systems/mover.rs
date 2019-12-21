@@ -77,7 +77,7 @@ impl<'s> System<'s> for Mover {
                     let t = t.translation();
                     (t.x, t.y)
                 };
-                let mut screen_pos = iso_to_screen(pos.x, pos.y);
+                let mut screen_pos = iso_to_screen(pos);
                 screen_pos.z += CHARACTER_Z_OFFSET;
                 t.set_translation(screen_pos);
 

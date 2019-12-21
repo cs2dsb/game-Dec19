@@ -11,7 +11,7 @@ pub use animation::Animation;
 mod age;
 pub use age::Age;
 
-mod map;
+pub mod map;
 pub use map::Map;
 
 mod navigator;
@@ -26,6 +26,12 @@ pub use path::{
 mod color;
 pub use color::Color;
 
+mod creep;
+pub use creep::Creep;
+
+mod tower;
+pub use tower::{ Tower, BulletTower };
+
 /// This allows systems to be commented in and out without causing runtime errors
 pub fn register_components<S, T, E, X>(builder: ApplicationBuilder<S, T, E, X>) -> ApplicationBuilder<S, T, E, X>
 where
@@ -39,4 +45,7 @@ where
         .register::<Navigator>()
         .register::<Path>()
         .register::<Color>()
+        .register::<Creep>()
+        .register::<BulletTower>()
+        .register::<Tower>()
 }

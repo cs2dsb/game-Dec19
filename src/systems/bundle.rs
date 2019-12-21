@@ -13,6 +13,7 @@ use crate::systems::{
     MoveCamera,
     MapGenerator,
     PathFinder,
+    TowerAim,
 };
 use amethyst::{
     core::{
@@ -46,6 +47,7 @@ impl<'a, 'b> SystemBundle<'a, 'b> for Bundle {
         builder.add(Animator, "animator_system", &["heading_system"]);  
         builder.add(MoveCamera, "move_camera_system", &[]);
         builder.add(PathFinder, "path_finder_system", &[]);
+        builder.add(TowerAim, "tower_aim_system", &["mover_system"]);
         Ok(())
     }
 }

@@ -8,6 +8,7 @@ use crate::{
         Age,
         Animation,
         Velocity,
+        Creep,
     },
     resources::{
         AnimationId,
@@ -23,9 +24,10 @@ impl<'s> System<'s> for Murder {
         WriteStorage<'s, Animation>,
         WriteStorage<'s, Velocity>,
         WriteStorage<'s, Transform>,
+        WriteStorage<'s, Creep>,
     );
 
-    fn run(&mut self, (entities, ages, mut animation, mut velocities, mut transforms): Self::SystemData) {
+    fn run(&mut self, (entities, ages, mut animation, mut velocities, mut transforms, mut creeps): Self::SystemData) {
         for (e, age) in (&entities, &ages).join() {
             if !entities.is_alive(e) {
                 continue;
@@ -34,6 +36,7 @@ impl<'s> System<'s> for Murder {
                 if age.age > max_age {
                     if let Some(anim) = animation.get_mut(e) {
                         velocities.remove(e);
+                        creeps.remove(e);
 
                         let (next, wait) = match anim.current {
                             Some(AnimationId::WalkUp) => (Some(AnimationId::DieUp), false),

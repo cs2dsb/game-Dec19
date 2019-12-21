@@ -1,5 +1,8 @@
 use amethyst::{
-    core::transform::Transform,
+    core::{
+        transform::Transform,
+        math::Vector2,
+    },
     ecs::prelude::{
         Entities,
         System, 
@@ -214,7 +217,7 @@ fn create_tile(
         z_offset: f32
 ) {
     let transform = {
-        let mut screen_pos = iso_to_screen(x, y);
+        let mut screen_pos = iso_to_screen(Vector2::new(x, y));
         screen_pos.z += z_offset;
 
         let mut transform = Transform::default();

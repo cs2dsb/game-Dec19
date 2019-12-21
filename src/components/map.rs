@@ -19,12 +19,15 @@ use ndarray::{
 	Axis,
 	s,
 };
-use crate::config::{
+use crate::{
+	config::{
 		Map as MapConfig,
 		map::{
-				Room as RoomConfig,
-				MapEntity as MapEntityConfig,
+			Room as RoomConfig,
+			MapEntity as MapEntityConfig,
 		},
+	},
+	util::screen_to_iso,
 };
 use std::slice::IterMut;
 
@@ -188,6 +191,7 @@ impl PartialEq for Door {
 	}
 }
 
+
 pub struct Map {
 	width: usize,
 	height: usize,
@@ -201,7 +205,7 @@ pub struct Map {
 }
 
 impl Component for Map {
-		type Storage = DenseVecStorage<Self>;
+	type Storage = DenseVecStorage<Self>;
 }
 
 impl Map {
@@ -227,6 +231,95 @@ impl Map {
 		self.state[i] == Wall
 	}
 
+	pub fn world_to_cell_index(&self, pos: Vector2<f32>) -> Option<(usize, usize)> {
+		let pos = screen_to_iso(pos);
+
+		let x = pos.x.floor();
+		let y = pos.y.floor();
+		if x < 0. || y < 0. {
+			None
+		} else {
+			let x = x as usize;
+			let y = y as usize;
+
+			if x >= self.width || y >= self.height {
+				None
+			} else {
+				Some((x, y))
+			}
+		}
+	}
+
+	pub fn ray_visit(&self, (x0, y0): (usize, usize), (x1, y1): (usize, usize)) -> Vec<(usize, usize)> {
+		let mut res = Vec::new();
+
+		let x0 = x0 as isize;
+		let y0 = y0 as isize;
+		let x1 = x1 as isize;
+		let y1 = y1 as isize;
+
+		let dx = (x1 - x0).abs();
+    	let dy = (y1 - y0).abs();
+    	let mut x = x0;
+    	let mut y = y0;
+	    let n = 1 + dx + dy;
+	    let x_inc = if x1 > x0 { 1 } else { -1 };
+	    let y_inc = if y1 > y0 { 1 } else { -1 };
+	    let mut error = dx - dy;
+	    let dx = dx * 2;
+	    let dy = dy * 2;
+
+	    for _ in 0..n {
+	    	res.push((x as usize, y as usize));
+	    	if error > 0 {
+	    		x += x_inc;
+	    		error -= dy;
+	    	} else {
+	    		y += y_inc;
+	    		error += dx;
+	    	}
+	    }
+
+		res
+	}
+
+	pub fn line_of_sight(&self, (x0, y0): (usize, usize), (x1, y1): (usize, usize)) -> bool {
+		if x0 >= self.width || y0 >= self.height  || x1 >= self.width || y1 >= self.height {
+			return false;
+		}
+
+		let x0 = x0 as isize;
+		let y0 = y0 as isize;
+		let x1 = x1 as isize;
+		let y1 = y1 as isize;
+
+		let dx = (x1 - x0).abs();
+    	let dy = (y1 - y0).abs();
+    	let mut x = x0;
+    	let mut y = y0;
+	    let n = 1 + dx + dy;
+	    let x_inc = if x1 > x0 { 1 } else { -1 };
+	    let y_inc = if y1 > y0 { 1 } else { -1 };
+	    let mut error = dx - dy;
+	    let dx = dx * 2;
+	    let dy = dy * 2;
+
+	    for _ in 0..n {
+	    	if self.state[(x as usize, y as usize)] == Wall {
+	    		return false;
+	    	}
+	    	if error > 0 {
+	    		x += x_inc;
+	    		error -= dy;
+	    	} else {
+	    		y += y_inc;
+	    		error += dx;
+	    	}
+	    }
+
+		true
+	}
+
 	//These are just for early visualization
 	#[allow(dead_code)]
 	pub fn rooms(&self) -> &[MapObject] { &self.rooms }
@@ -246,7 +339,6 @@ impl Map {
 	pub fn walls_mut(&mut self) -> IterMut<MapObject> {
 		self.walls.iter_mut()
 	}
-
 
 	fn print(&self) {
         for x in self.state.axis_iter(Axis(0)).rev() {
