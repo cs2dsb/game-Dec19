@@ -40,7 +40,6 @@ impl<'s> System<'s> for Heading {
                 _ => unreachable!(),
             };
 
-
             animation.next = Some(animation_id);
         }
     }

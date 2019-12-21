@@ -6,10 +6,7 @@ use amethyst::{
         Unit,
     },
 };
-use crate::util::{
-    limit,
-    math::radians,
-};
+use crate::util::math::radians;
 use rand::random;
 
 union Transmute<T: Copy, U: Copy> {
@@ -27,7 +24,6 @@ const X_AXIS: Unit<Vector2<f32>> = unsafe {
 #[derive(Debug)]
 pub struct Velocity {
     pub velocity: Vector2<f32>,
-    pub max_speed: f32,
     pub speed: f32,
 }
 
@@ -36,12 +32,11 @@ impl Component for Velocity {
 }
 
 impl Velocity {
-    pub fn new(x: f32, y: f32, max_speed: f32) -> Self {
+    pub fn new(x: f32, y: f32) -> Self {
         let velocity = Vector2::new(x, y);
         let speed = velocity.magnitude();
         Self {
             velocity,
-            max_speed,
             speed,
         }
     }
@@ -55,11 +50,7 @@ impl Velocity {
             .normalize()
             * mag;
 
-        Self::new(velocity.x, velocity.y, max)
-    }
-
-    pub fn clamp(&mut self) {
-        limit(&mut self.velocity, self.max_speed);
+        Self::new(velocity.x, velocity.y)
     }
     
     pub fn angle(&self) -> f32 {

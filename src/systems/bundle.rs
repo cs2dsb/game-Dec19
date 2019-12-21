@@ -2,7 +2,8 @@
 use crate::systems::{
     Heading,
     Animator,
-    Mover,
+    NavigatorMover,
+    ProjectileMover,
     DebugDraw,
     ClearDebug,
     Bouncer,
@@ -14,6 +15,7 @@ use crate::systems::{
     MapGenerator,
     PathFinder,
     TowerAim,
+    TowerShoot,
 };
 use amethyst::{
     core::{
@@ -36,10 +38,11 @@ impl<'a, 'b> SystemBundle<'a, 'b> for Bundle {
     ) -> Result<(), Error> {
         builder.add(MapGenerator, "map_generator_system", &[]);
         builder.add(ClearDebug, "clear_debug_system", &[]);
-        builder.add(Mover, "mover_system", &[]); 
+        builder.add(NavigatorMover, "navigator_mover_system", &[]); 
+        builder.add(ProjectileMover, "projectile_mover_system", &[]); 
         //builder.add(Bouncer, "bouncer_system", &["mover_system"]);
-        builder.add(Heading, "heading_system", &["mover_system"]);     
-        builder.add(DebugDraw, "debug_draw_system", &["mover_system"]);
+        builder.add(Heading, "heading_system", &["navigator_mover_system"]);     
+        builder.add(DebugDraw, "debug_draw_system", &["navigator_mover_system", "projectile_mover_system"]);
         builder.add(Spawner::default(), "spawner_system", &[]);
         builder.add(FpsLog::default(), "fps_log_system", &[]);
         builder.add(Age, "age_system", &[]);
@@ -47,7 +50,8 @@ impl<'a, 'b> SystemBundle<'a, 'b> for Bundle {
         builder.add(Animator, "animator_system", &["heading_system"]);  
         builder.add(MoveCamera, "move_camera_system", &[]);
         builder.add(PathFinder, "path_finder_system", &[]);
-        builder.add(TowerAim, "tower_aim_system", &["mover_system"]);
+        builder.add(TowerAim, "tower_aim_system", &["navigator_mover_system"]);
+        builder.add(TowerShoot, "tower_shoot_system", &["tower_aim_system"]);
         Ok(())
     }
 }

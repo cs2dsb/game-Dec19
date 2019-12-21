@@ -7,6 +7,7 @@ pub struct DebugDraw {
     pub tower_range: bool,
     pub tower_target: bool,
     pub tower_los: bool,
+    pub projectiles: bool,
 }
 
 impl Default for DebugDraw {
@@ -17,6 +18,7 @@ impl Default for DebugDraw {
         tower_range: false,
         tower_target: false,
         tower_los: false,
+        projectiles: false,
     }
   }
 }

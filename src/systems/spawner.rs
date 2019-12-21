@@ -14,8 +14,11 @@ use amethyst::{
 use crate::{
     components::Map,
     resources::Sprites,
-    util::spawn::{ spawn, SpawnType, random_room },
-    config::Spawner as SpawnerConfig,
+    util::spawn::{ spawn_creep, spawn_tower, random_room },
+    config::{
+        Spawner as SpawnerConfig,
+        Tower as TowerConfig,
+    },
 };
 use std::usize;
 
@@ -37,7 +40,7 @@ impl Spawner {
     ) {
         if self.creep_count < spawner_config.max_spawns.unwrap_or(usize::MAX) {
             if let Ok(room) = random_room(map) {
-                spawn(entities, lazy_update, sprites_resource, room, spawner_config, SpawnType::Creep);
+                spawn_creep(entities, lazy_update, sprites_resource, room, spawner_config);
                 self.creep_count += 1;
             }
         }
@@ -50,13 +53,14 @@ impl Spawner {
         sprites_resource: &Read<Sprites>,
         map: &Map,
         spawner_config: &SpawnerConfig,
+        tower_config: &TowerConfig,
     ) {
         let rooms = map.rooms();
         while self.tower_count < spawner_config.max_towers.unwrap_or(5).min(rooms.len()) {
             if rooms.len() == 0 { return } 
 
             let room = &rooms[self.tower_count % rooms.len()];
-            spawn(entities, lazy_update, sprites_resource, room, spawner_config, SpawnType::BulletTower);
+            spawn_tower(entities, lazy_update, sprites_resource, room, tower_config);
 
             self.tower_count += 1;
         }
@@ -72,6 +76,7 @@ impl<'s> System<'s> for Spawner {
         Read<'s, FpsCounter>,
         ReadStorage<'s, Map>,
         ReadExpect<'s, SpawnerConfig>,
+        ReadExpect<'s, TowerConfig>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -83,6 +88,7 @@ impl<'s> System<'s> for Spawner {
             fps,
             maps,
             spawner_config,
+            tower_config,
         ) = data;
 
         if sprites_resource.is_none() { 
@@ -109,6 +115,7 @@ impl<'s> System<'s> for Spawner {
                 sprites_resource.as_ref().unwrap(),
                 &map.unwrap(),
                 &spawner_config,
+                &tower_config,
             );
         }
 

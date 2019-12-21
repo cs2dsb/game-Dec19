@@ -7,7 +7,6 @@ pub struct Spawner {
     pub max_speed: f32,
     pub max_spawns: Option<usize>,
     pub max_age: Option<f32>,
-    pub tower_range: f32,
     pub max_towers: Option<usize>,
 }
 
@@ -19,7 +18,6 @@ impl Default for Spawner {
         max_speed: 50.,
         max_spawns: Some(10),
         max_age: None,
-        tower_range: 10.,
         max_towers: Some(10),
     }
   }

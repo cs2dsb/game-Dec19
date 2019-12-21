@@ -9,13 +9,17 @@ use amethyst::ecs::{
 pub struct Tower {
     pub range: f32,
     pub target: Option<Entity>,
+    pub elapsed: f32,
+    pub frequency: f32,
 }
 
 impl Tower {
-    pub fn new(range: f32) -> Self {
+    pub fn new(range: f32, frequency: f32,) -> Self {
         Self {
             range,
             target: None,
+            elapsed: 0.,
+            frequency,
         }
     }
 }

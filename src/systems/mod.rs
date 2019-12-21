@@ -7,8 +7,11 @@ pub use bundle::*;
 mod animator;
 pub use animator::*;
 
-mod mover;
-pub use mover::*;
+mod navigator_mover;
+pub use navigator_mover::*;
+
+mod projectile_mover;
+pub use projectile_mover::*;
 
 mod debug_draw;
 pub use debug_draw::*;
@@ -42,3 +45,6 @@ pub use pathfinder::*;
 
 mod tower_aim;
 pub use tower_aim::*;
+
+mod tower_shoot;
+pub use tower_shoot::*;

@@ -28,9 +28,9 @@ use crate::{
     },
 };
 
-pub struct Mover;
+pub struct NavigatorMover;
 
-impl<'s> System<'s> for Mover {
+impl<'s> System<'s> for NavigatorMover {
     type SystemData = (
         WriteStorage<'s, Velocity>,
         WriteStorage<'s, Transform>,

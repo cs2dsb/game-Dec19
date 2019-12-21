@@ -32,6 +32,9 @@ pub use creep::Creep;
 mod tower;
 pub use tower::{ Tower, BulletTower };
 
+mod projectile;
+pub use projectile::Projectile;
+
 /// This allows systems to be commented in and out without causing runtime errors
 pub fn register_components<S, T, E, X>(builder: ApplicationBuilder<S, T, E, X>) -> ApplicationBuilder<S, T, E, X>
 where
@@ -48,4 +51,5 @@ where
         .register::<Creep>()
         .register::<BulletTower>()
         .register::<Tower>()
+        .register::<Projectile>()
 }

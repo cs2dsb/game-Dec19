@@ -12,11 +12,15 @@ pub use self::spawner::Spawner;
 pub mod debug_draw;
 pub use self::debug_draw::DebugDraw;
 
+pub mod tower;
+pub use self::tower::Tower;
+
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub struct Game {
     pub map: Map,
     pub spawner: Spawner,
     pub debug_draw: DebugDraw,
+    pub tower: Tower,
 }
 
 impl Game {
@@ -28,5 +32,6 @@ impl Game {
             .with_resource(self.map)
             .with_resource(self.spawner)
             .with_resource(self.debug_draw)
+            .with_resource(self.tower)
     }
 }

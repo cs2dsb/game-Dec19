@@ -31,6 +31,7 @@ use crate::{
         Color,
         Tower,
         Map,
+        Projectile,
     },
     util::{
         iso_to_screen,
@@ -54,6 +55,7 @@ impl<'s> System<'s> for DebugDraw {
         WriteStorage<'s, Color>,
         ReadExpect<'s, DebugDrawConfig>,
         ReadStorage<'s, Map>,
+        ReadStorage<'s, Projectile>,
     );
 
     fn run(&mut self, (
@@ -66,13 +68,14 @@ impl<'s> System<'s> for DebugDraw {
         mut colors,
         config,
         maps,
+        projectiles,
     ): Self::SystemData) {
         #[cfg(feature = "profiler")]
         profile_scope!("debug_draw_system");
 
-        //Create colors for entities without them
+        //Create colors for debug entities without them
         let mut new_colors = Vec::new();
-        for (e, _) in (&entities, !&colors).join() {
+        for (e, _, _) in (&entities, &debug_comps, !&colors).join() {
             if !entities.is_alive(e) { continue }
             let color = Color::rand();
             new_colors.push((e, color));
@@ -83,12 +86,16 @@ impl<'s> System<'s> for DebugDraw {
         }
 
         for (entity, transform, debug, color) in (&entities, &transforms, &mut debug_comps, &colors).join() {
+            let color: Srgba = color.clone().into();
+            let origin = {
+                let mut origin = Point3::from(*transform.translation());
+                origin.z = DEBUG_Z;
+                origin
+            };
+
             if config.velocity {
-                if let Some(velocity) = velocities.get(entity) {
-                    let mut origin = Point3::from(*transform.translation());
-                    origin.z = DEBUG_Z / 2.;
+                if let Some(velocity) = velocities.get(entity) {                    
                     let ve = Vector3::new(velocity.velocity.x, velocity.velocity.y, 0.);
-                
                     debug.add_line(
                         origin,
                         origin + ve * 60.,
@@ -100,20 +107,19 @@ impl<'s> System<'s> for DebugDraw {
             if config.pathfinding {
                 if let Some(path) = paths.get(entity) {
                     if let Some(path) = &path.path {
-                        let color: Srgba = color.clone().into();
                         for i in 1..path.0.len() {
                             let prev = &path.0[i-1];
                             let current = &path.0[i];
 
                             let sp = iso_to_screen(prev.clone().into());
-                            let origin = Point3::new(sp.x, sp.y, DEBUG_Z);
+                            let prev_point = Point3::new(sp.x, sp.y, DEBUG_Z);
                             
                             let sp = iso_to_screen(current.clone().into());
-                            let end = Point3::new(sp.x, sp.y, DEBUG_Z);
+                            let current_point = Point3::new(sp.x, sp.y, DEBUG_Z);
 
                             debug.add_line(
-                                origin,
-                                end,
+                                prev_point,
+                                current_point,
                                 color,
                             );
                         }
@@ -123,11 +129,6 @@ impl<'s> System<'s> for DebugDraw {
 
             if config.tower_range || config.tower_target {
                 if let Some(tower) = towers.get(entity) {
-                    let color: Srgba = color.clone().into();
-
-                    let mut origin = Point3::from(*transform.translation());
-                    origin.z = DEBUG_Z;
-
                     if config.tower_range {
                         add_ellipse_2d(
                             debug,
@@ -189,6 +190,18 @@ impl<'s> System<'s> for DebugDraw {
                             }
                         }
                     }
+                }
+            }
+
+            if config.projectiles {
+                if let Some(_) = projectiles.get(entity) {
+                    debug.add_circle_2d(
+                        origin,
+                        5.,
+                        4,
+                        color,
+                    );
+
                 }
             }
         }
